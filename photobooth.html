@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Booth Soriana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #5A9E1E 0%, #ED1C24 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .camera-section {
+            margin-bottom: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            aspect-ratio: 1 / 1;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            aspect-ratio: 1 / 1;
+            display: none;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controls button {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: #8CC63F;
+            color: white;
+            grid-column: 1 / -1;
+            font-size: 16px;
+            padding: 15px;
+        }
+
+        .btn-primary:hover {
+            background: #7AAE35;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(140, 198, 63, 0.4);
+        }
+
+        .btn-secondary {
+            background: #E4F5CC;
+            color: #5A9E1E;
+            border: 2px solid #8CC63F;
+        }
+
+        .btn-secondary:hover {
+            background: #8CC63F;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ED1C24;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #C41017;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            display: block;
+            font-weight: 600;
+            color: #5A9E1E;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .filter-btn:hover {
+            border-color: #8CC63F;
+            background: #F5F5F5;
+        }
+
+        .filter-btn.active {
+            background: #8CC63F;
+            color: white;
+            border-color: #8CC63F;
+        }
+
+        .sticker-section {
+            margin-bottom: 20px;
+        }
+
+        .sticker-label {
+            display: block;
+            font-weight: 600;
+            color: #5A9E1E;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .sticker-btn {
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .sticker-btn:hover {
+            border-color: #8CC63F;
+            background: #F5F5F5;
+        }
+
+        .sticker-btn.active {
+            background: #ED1C24;
+            color: white;
+            border-color: #ED1C24;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            display: none;
+        }
+
+        .action-buttons.show {
+            display: grid;
+        }
+
+        .action-buttons button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download {
+            background: #8CC63F;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #7AAE35;
+        }
+
+        .btn-share {
+            background: #ED1C24;
+            color: white;
+        }
+
+        .btn-share:hover {
+            background: #C41017;
+        }
+
+        .btn-retake {
+            grid-column: 1 / -1;
+            background: #5A9E1E;
+            color: white;
+            font-size: 16px;
+        }
+
+        .btn-retake:hover {
+            background: #4A8018;
+        }
+
+        .flip-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .flip-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .message {
+            background: #E4F5CC;
+            color: #5A9E1E;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Photo Booth</h1>
+            <p>¡Soriana!</p>
+        </div>
+
+        <div class="content">
+            <div class="message" id="message"></div>
+
+            <div class="camera-section">
+                <div class="video-container" id="videoContainer">
+                    <video id="video" playsinline></video>
+                    <button class="flip-btn" id="flipBtn" title="Cambiar cámara">🔄</button>
+                </div>
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <label class="filter-label">Filtros</label>
+                <div class="filter-grid">
+                    <button class="filter-btn active" data-filter="normal">Normal</button>
+                    <button class="filter-btn" data-filter="calido">Cálido</button>
+                    <button class="filter-btn" data-filter="fresco">Fresco</button>
+                    <button class="filter-btn" data-filter="vintage">Vintage</button>
+                    <button class="filter-btn" data-filter="vivo">Vivo</button>
+                    <button class="filter-btn" data-filter="bn">B&N</button>
+                </div>
+            </div>
+
+            <div class="sticker-section">
+                <label class="sticker-label">Accesorios</label>
+                <div class="sticker-grid">
+                    <button class="sticker-btn" data-sticker="none">Ninguno</button>
+                    <button class="sticker-btn" data-sticker="sombrero">🎩 Sombrero</button>
+                    <button class="sticker-btn" data-sticker="bigote">👨 Bigote</button>
+                    <button class="sticker-btn" data-sticker="flags">🇲🇽 Banderas</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-primary" id="captureBtn">Tomar Foto</button>
+            </div>
+
+            <div class="action-buttons" id="actionButtons">
+                <button class="btn-download" id="downloadBtn">⬇️ Descargar</button>
+                <button class="btn-share" id="shareBtn">↗️ Compartir</button>
+                <button class="btn-retake" id="retakeBtn">Otra Foto</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const videoContainer = document.getElementById('videoContainer');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const captureBtn = document.getElementById('captureBtn');
+        const actionButtons = document.getElementById('actionButtons');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const retakeBtn = document.getElementById('retakeBtn');
+        const flipBtn = document.getElementById('flipBtn');
+        const messageEl = document.getElementById('message');
+
+        let currentFilter = 'normal';
+        let selectedSticker = 'none';
+        let facingMode = 'user';
+        let stream = null;
+        let photoData = null;
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode }
+                });
+                video.srcObject = stream;
+                showMessage('Cámara lista', 'success');
+            } catch (err) {
+                showMessage('Error de acceso a cámara: ' + err.message, 'error');
+                console.error(err);
+            }
+        }
+
+        // Flip camera
+        flipBtn.addEventListener('click', async () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            facingMode = facingMode === 'user' ? 'environment' : 'user';
+            await initCamera();
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+            });
+        });
+
+        // Sticker buttons
+        document.querySelectorAll('.sticker-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.sticker-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSticker = btn.dataset.sticker;
+            });
+        });
+
+        // Apply filters via Canvas
+        function applyFilter(imageData) {
+            const data = imageData.data;
+            const length = data.length;
+
+            for (let i = 0; i < length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+
+                switch (currentFilter) {
+                    case 'calido': // Warm tones
+                        data[i] = Math.min(255, r * 1.2);
+                        data[i + 1] = Math.min(255, g * 1.1);
+                        data[i + 2] = Math.max(0, b * 0.8);
+                        break;
+
+                    case 'fresco': // Cool tones
+                        data[i] = Math.max(0, r * 0.8);
+                        data[i + 1] = Math.min(255, g * 1.1);
+                        data[i + 2] = Math.min(255, b * 1.2);
+                        break;
+
+                    case 'vintage': // Sepia-like, desaturated
+                        const avg = (r + g + b) / 3;
+                        data[i] = Math.min(255, avg * 1.1);
+                        data[i + 1] = Math.min(255, avg * 0.95);
+                        data[i + 2] = Math.max(0, avg * 0.7);
+                        break;
+
+                    case 'vivo': // High saturation
+                        const max = Math.max(r, g, b);
+                        const min = Math.min(r, g, b);
+                        const delta = max - min;
+                        if (delta > 0) {
+                            data[i] = Math.min(255, r + (r - avg) * 0.5);
+                            data[i + 1] = Math.min(255, g + (g - avg) * 0.5);
+                            data[i + 2] = Math.min(255, b + (b - avg) * 0.5);
+                        }
+                        break;
+
+                    case 'bn': // Grayscale
+                        const gray = r * 0.299 + g * 0.587 + b * 0.114;
+                        data[i] = gray;
+                        data[i + 1] = gray;
+                        data[i + 2] = gray;
+                        break;
+
+                    case 'normal':
+                    default:
+                        break;
+                }
+            }
+
+            return imageData;
+        }
+
+        // Draw sombrero sticker
+        function drawSombrero(x, y, size) {
+            const scale = size / 100;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+
+            // Brim (ala)
+            ctx.fillStyle = '#1a1a1a';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 80, 50, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Crown
+            ctx.fillStyle = '#2a2a2a';
+            ctx.beginPath();
+            ctx.moveTo(-40, 0);
+            ctx.quadraticCurveTo(-50, -60, -20, -80);
+            ctx.quadraticCurveTo(0, -90, 20, -80);
+            ctx.quadraticCurveTo(50, -60, 40, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            // Decorative band
+            ctx.fillStyle = '#C41017';
+            ctx.beginPath();
+            ctx.ellipse(0, -10, 70, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Draw mustache sticker
+        function drawBigote(x, y, size) {
+            const scale = size / 100;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            // Left side
+            ctx.bezierCurveTo(-60, -20, -80, -30, -90, -10);
+            ctx.bezierCurveTo(-80, 0, -60, 10, -30, 5);
+            // Center
+            ctx.lineTo(0, 0);
+            // Right side
+            ctx.lineTo(30, 5);
+            ctx.bezierCurveTo(60, 10, 80, 0, 90, -10);
+            ctx.bezierCurveTo(80, -30, 60, -20, 30, -5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // Draw flag decorations
+        function drawFlags(x, y, size) {
+            const scale = size / 100;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+
+            // Green stripe
+            ctx.fillStyle = '#8CC63F';
+            ctx.fillRect(-80, -40, 50, 80);
+
+            // White stripe
+            ctx.fillStyle = '#FFF';
+            ctx.fillRect(-30, -40, 50, 80);
+
+            // Red stripe
+            ctx.fillStyle = '#ED1C24';
+            ctx.fillRect(20, -40, 50, 80);
+
+            // Stars
+            ctx.fillStyle = '#FFD700';
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * Math.PI * 2) / 5 - Math.PI / 2;
+                const sx = Math.cos(angle) * 30;
+                const sy = Math.sin(angle) * 30;
+                if (i === 0) ctx.beginPath();
+                ctx.lineTo(sx, sy);
+                if (i === 4) {
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // Draw watermark
+        function drawWatermark() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('📸 Photo Booth Soriana', canvas.width / 2, canvas.height - 25);
+        }
+
+        // Draw branded frame
+        function drawFrame() {
+            const frameWidth = 12;
+            ctx.strokeStyle = '#8CC63F';
+            ctx.lineWidth = frameWidth;
+            ctx.strokeRect(frameWidth / 2, frameWidth / 2, canvas.width - frameWidth, canvas.height - frameWidth);
+
+            ctx.strokeStyle = '#ED1C24';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(frameWidth + 4, frameWidth + 4, canvas.width - frameWidth * 2 - 8, canvas.height - frameWidth * 2 - 8);
+        }
+
+        // Capture photo
+        captureBtn.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame
+            ctx.drawImage(video, 0, 0);
+
+            // Apply filter
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const filteredData = applyFilter(imageData);
+            ctx.putImageData(filteredData, 0, 0);
+
+            // Draw frame
+            drawFrame();
+
+            // Draw sticker if selected
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const stickerSize = Math.min(canvas.width, canvas.height) / 4;
+
+            if (selectedSticker === 'sombrero') {
+                drawSombrero(centerX, centerY - stickerSize / 2, stickerSize);
+            } else if (selectedSticker === 'bigote') {
+                drawBigote(centerX, centerY, stickerSize / 1.5);
+            } else if (selectedSticker === 'flags') {
+                drawFlags(centerX, centerY - stickerSize / 3, stickerSize);
+            }
+
+            // Draw watermark
+            drawWatermark();
+
+            // Store photo data
+            photoData = canvas.toDataURL('image/png');
+
+            // Show canvas, hide video
+            videoContainer.style.display = 'none';
+            canvasContainer.style.display = 'block';
+            captureBtn.style.display = 'none';
+            actionButtons.classList.add('show');
+
+            // Confetti animation
+            createConfetti();
+
+            showMessage('¡Foto tomada con éxito!', 'success');
+        });
+
+        // Create confetti
+        function createConfetti() {
+            const colors = ['#8CC63F', '#ED1C24', '#5A9E1E', '#FFD700', '#FFF'];
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3500);
+            }
+        }
+
+        // Download photo
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = photoData;
+            link.download = `photo-booth-soriana-${Date.now()}.png`;
+            link.click();
+            showMessage('Foto descargada', 'success');
+        });
+
+        // Share photo
+        shareBtn.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    const blob = await (await fetch(photoData)).blob();
+                    const file = new File([blob], 'photo-booth-soriana.png', { type: 'image/png' });
+                    await navigator.share({
+                        title: 'Photo Booth Soriana',
+                        text: '¡Mira mi foto del Photo Booth Soriana!',
+                        files: [file]
+                    });
+                    showMessage('Compartida', 'success');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        showMessage('Error al compartir', 'error');
+                    }
+                }
+            } else {
+                // Fallback: Copy to clipboard
+                navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': fetch(photoData).then(r => r.blob())
+                    })
+                ]).then(() => {
+                    showMessage('Foto copiada al portapapeles', 'success');
+                }).catch(() => {
+                    showMessage('Compartir no disponible en este navegador', 'error');
+                });
+            }
+        });
+
+        // Retake photo
+        retakeBtn.addEventListener('click', () => {
+            videoContainer.style.display = 'block';
+            canvasContainer.style.display = 'none';
+            captureBtn.style.display = 'block';
+            actionButtons.classList.remove('show');
+            photoData = null;
+            showMessage('', '');
+        });
+
+        // Show message
+        function showMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = 'message';
+            if (text) {
+                messageEl.classList.add('show');
+                if (type === 'success') {
+                    messageEl.style.background = '#E4F5CC';
+                    messageEl.style.color = '#5A9E1E';
+                } else if (type === 'error') {
+                    messageEl.style.background = '#FFE0E0';
+                    messageEl.style.color = '#ED1C24';
+                }
+            }
+            if (text) {
+                setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initCamera);
+
+        // Cleanup on unload
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cazador Soriana</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.05) 20px
+            );
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 0.95em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .welcome-icon {
+            font-size: 4em;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+
+        .welcome-screen h2 {
+            color: #5A9E1E;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen p {
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .instructions {
+            background: #E4F5CC;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            color: #333;
+        }
+
+        .instructions h3 {
+            color: #5A9E1E;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, #ED1C24 0%, #C41017 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(237, 28, 36, 0.3);
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(237, 28, 36, 0.4);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        /* Progress Section */
+        .progress-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #F5F5F5;
+            border-radius: 10px;
+        }
+
+        .progress-info {
+            flex: 1;
+        }
+
+        .progress-info h3 {
+            color: #5A9E1E;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .points-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ED1C24;
+        }
+
+        .progress-ring-container {
+            width: 80px;
+            height: 80px;
+            margin-left: 20px;
+        }
+
+        /* Map Grid */
+        .map-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .location-card {
+            background: white;
+            border: 2px solid #8CC63F;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .location-card.found {
+            background: linear-gradient(135deg, #E4F5CC 0%, #8CC63F 100%);
+            border-color: #5A9E1E;
+            box-shadow: 0 5px 15px rgba(92, 158, 30, 0.3);
+            transform: scale(1.02);
+        }
+
+        .location-card.not-found {
+            opacity: 0.7;
+        }
+
+        .location-card.not-found:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(140, 198, 63, 0.2);
+        }
+
+        .location-card:active {
+            transform: scale(0.98);
+        }
+
+        .location-icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+
+        .location-name {
+            font-weight: bold;
+            color: #5A9E1E;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+
+        .location-points {
+            font-size: 0.85em;
+            color: #ED1C24;
+            font-weight: bold;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: #5A9E1E;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Scan Animation */
+        .scan-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .scan-box {
+            width: 200px;
+            height: 200px;
+            border: 3px solid #8CC63F;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #8CC63F, transparent);
+            top: 0;
+            left: 0;
+            animation: scan 2s infinite;
+        }
+
+        .scan-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0;
+            }
+            100% {
+                top: 100%;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #5A9E1E;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .modal-header .points-earned {
+            color: #ED1C24;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .fun-fact {
+            background: #E4F5CC;
+            padding: 15px;
+            border-radius: 10px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            border-left: 4px solid #8CC63F;
+        }
+
+        .fun-fact-title {
+            font-weight: bold;
+            color: #5A9E1E;
+            margin-bottom: 8px;
+        }
+
+        .close-button {
+            background: #8CC63F;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .close-button:hover {
+            background: #5A9E1E;
+            transform: translateY(-2px);
+        }
+
+        /* Results Screen */
+        .results-screen {
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .results-title {
+            color: #5A9E1E;
+            font-size: 2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .final-points {
+            font-size: 3em;
+            color: #ED1C24;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .achievement {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .qr-coupon {
+            background: #F5F5F5;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .qr-title {
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .qr-box {
+            width: 150px;
+            height: 150px;
+            background: white;
+            border: 2px solid #8CC63F;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-size: 0.8em;
+            color: #666;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .qr-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #5A9E1E;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .replay-button {
+            background: linear-gradient(135deg, #ED1C24 0%, #C41017 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(237, 28, 36, 0.3);
+        }
+
+        .replay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(237, 28, 36, 0.4);
+        }
+
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* SVG Progress Ring */
+        svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .map-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .progress-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .progress-ring-container {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const LOCATIONS = [
+            {
+                id: 1,
+                name: 'Frutas y Verduras',
+                points: 100,
+                icon: '🥬',
+                clue: 'Donde los colores de México brillan frescos cada mañana',
+                funFact: 'México es uno de los principales productores de frutas y verduras en el mundo. Nuestros mercados ancestrales como Tenochtitlán ya cultivaban tomates, chiles, aguacates y más productos que hoy alimentan al mundo.',
+            },
+            {
+                id: 2,
+                name: 'Panadería',
+                points: 150,
+                icon: '🥖',
+                clue: 'El aroma que despierta al país entero',
+                funFact: 'El pan es parte de la identidad mexicana. Desde el pan de muerto hasta el bolillo, la panadería tradicional mexicana tiene siglos de historia y maestría en cada pieza.',
+            },
+            {
+                id: 3,
+                name: 'Carnes y Pescados',
+                points: 150,
+                icon: '🐟',
+                clue: 'Del mar y del campo, lo mejor de nuestra tierra',
+                funFact: 'Las costas de México ofrecen algunos de los mejores pescados y mariscos del mundo. Camarones, huachinango, pulpo y hueva de atún son tesoros del océano Pacífico y Atlántico.',
+            },
+            {
+                id: 4,
+                name: 'Lácteos y Quesos',
+                points: 100,
+                icon: '🧀',
+                clue: 'Blanco como las nubes sobre el Popocatépetl',
+                funFact: 'México produce algunos de los mejores quesos del mundo. El queso Oaxaca, Chihuahua y Asadero tienen denominación de origen y son reconocidos internacionalmente por su calidad.',
+            },
+            {
+                id: 5,
+                name: 'Abarrotes',
+                points: 200,
+                icon: '🏪',
+                clue: 'El corazón de toda despensa mexicana',
+                funFact: 'Los abarrotes son la esencia de la cocina mexicana. Frijoles, maíz, chiles secos, aceite y especias que llevan sabor a cada hogar mexicano y crean la magia de nuestros platillos tradicionales.',
+            },
+            {
+                id: 6,
+                name: 'Bebidas',
+                points: 100,
+                icon: '🥤',
+                clue: 'Desde el agua fresca hasta los sabores de México',
+                funFact: 'México es cuna de bebidas icónicas como el chocolate, el pulque y el mezcal. Nuestras bebidas tradicionales tienen miles de años de historia y son patrimonio gastronómico mundial.',
+            },
+        ];
+
+        function createConfetti() {
+            const confetti = [];
+            for (let i = 0; i < 50; i++) {
+                confetti.push({
+                    id: i,
+                    left: Math.random() * 100,
+                    delay: Math.random() * 0.5,
+                    duration: 3 + Math.random() * 1,
+                    color: ['#8CC63F', '#ED1C24', '#FFD700'][Math.floor(Math.random() * 3)],
+                });
+            }
+            return confetti;
+        }
+
+        function ProgressRing({ progress }) {
+            const radius = 30;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (progress / 100) * circumference;
+
+            return (
+                <svg width="80" height="80">
+                    <circle
+                        cx="40"
+                        cy="40"
+                        r={radius}
+                        fill="none"
+                        stroke="#E4F5CC"
+                        strokeWidth="4"
+                    />
+                    <circle
+                        className="progress-circle"
+                        cx="40"
+                        cy="40"
+                        r={radius}
+                        fill="none"
+                        stroke="#8CC63F"
+                        strokeWidth="4"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={offset}
+                        strokeLinecap="round"
+                    />
+                    <text
+                        x="40"
+                        y="45"
+                        textAnchor="middle"
+                        fontSize="18"
+                        fontWeight="bold"
+                        fill="#5A9E1E"
+                    >
+                        {Math.round(progress)}%
+                    </text>
+                </svg>
+            );
+        }
+
+        function Confetti({ pieces }) {
+            return (
+                <>
+                    {pieces.map((piece) => (
+                        <div
+                            key={piece.id}
+                            className="confetti"
+                            style={{
+                                left: piece.left + '%',
+                                top: '-10px',
+                                animation: `fall ${piece.duration}s linear ${piece.delay}s forwards`,
+                                background: piece.color,
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '50%',
+                                opacity: piece.opacity || 1,
+                            }}
+                        />
+                    ))}
+                    <style>{`
+                        @keyframes fall {
+                            to {
+                                transform: translateY(100vh) rotate(360deg);
+                                opacity: 0;
+                            }
+                        }
+                    `}</style>
+                </>
+            );
+        }
+
+        function CazadorApp() {
+            const [gameState, setGameState] = useState('welcome'); // welcome, playing, results
+            const [foundLocations, setFoundLocations] = useState([]);
+            const [selectedLocation, setSelectedLocation] = useState(null);
+            const [showScanning, setShowScanning] = useState(false);
+            const [confettiPieces, setConfettiPieces] = useState([]);
+
+            const totalPoints = foundLocations.reduce((sum, id) => {
+                const location = LOCATIONS.find((l) => l.id === id);
+                return sum + (location ? location.points : 0);
+            }, 0);
+
+            const progress = (foundLocations.length / LOCATIONS.length) * 100;
+
+            const getAchievement = () => {
+                if (totalPoints >= 800) {
+                    return { title: 'LEYENDA MEXICANA', icon: '👑' };
+                } else if (totalPoints >= 500) {
+                    return { title: 'EXPLORADOR', icon: '🗺️' };
+                } else {
+                    return { title: 'AVENTURERO', icon: '🔍' };
+                }
+            };
+
+            const handleStart = () => {
+                setGameState('playing');
+                setFoundLocations([]);
+                setSelectedLocation(null);
+            };
+
+            const handleLocationClick = (location) => {
+                if (foundLocations.includes(location.id)) {
+                    setSelectedLocation(location);
+                    return;
+                }
+
+                setShowScanning(true);
+                setTimeout(() => {
+                    setShowScanning(false);
+                    setFoundLocations([...foundLocations, location.id]);
+                    setSelectedLocation(location);
+
+                    if (foundLocations.length + 1 === LOCATIONS.length) {
+                        // Generate confetti on completion
+                        const pieces = createConfetti();
+                        setConfettiPieces(pieces);
+                        setTimeout(() => setGameState('results'), 1000);
+                    }
+                }, 2000);
+            };
+
+            const handleCloseModal = () => {
+                setSelectedLocation(null);
+            };
+
+            const handleReplay = () => {
+                setGameState('welcome');
+                setFoundLocations([]);
+                setSelectedLocation(null);
+                setConfettiPieces([]);
+            };
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>CAZADOR SORIANA</h1>
+                        {gameState === 'welcome' && <p>Búsqueda del Tesoro</p>}
+                        {gameState === 'playing' && <p>¡A Explorar!</p>}
+                        {gameState === 'results' && <p>¡Felicidades!</p>}
+                    </div>
+
+                    <div className="content">
+                        {gameState === 'welcome' && (
+                            <div className="welcome-screen">
+                                <div className="welcome-icon">🏪</div>
+                                <h2>Bienvenido a la Aventura</h2>
+                                <p>Explora los tesoros escondidos en tu tienda Soriana más cercana y desvela los secretos de la gastronomía mexicana.</p>
+
+                                <div className="instructions">
+                                    <h3>¿Cómo Jugar?</h3>
+                                    <ol>
+                                        <li>Encuentra todos los 6 tesoros en la tienda</li>
+                                        <li>Cada sección tiene una pista que te guiará</li>
+                                        <li>Acumula puntos según cada ubicación</li>
+                                        <li>Descubre datos fascinantes sobre la comida mexicana</li>
+                                        <li>¡Completa el juego y gana un premio!</li>
+                                    </ol>
+                                </div>
+
+                                <p style={{ marginTop: '20px', color: '#5A9E1E', fontWeight: 'bold' }}>
+                                    Puntos totales disponibles: 800
+                                </p>
+
+                                <button className="start-button" onClick={handleStart}>
+                                    Comenzar Aventura
+                                </button>
+                            </div>
+                        )}
+
+                        {gameState === 'playing' && (
+                            <>
+                                <div className="progress-section">
+                                    <div className="progress-info">
+                                        <h3>Progreso</h3>
+                                        <div className="points-display">{totalPoints} pts</div>
+                                        <p style={{ fontSize: '0.85em', color: '#666', marginTop: '3px' }}>
+                                            {foundLocations.length} de {LOCATIONS.length} tesoros
+                                        </p>
+                                    </div>
+                                    <div className="progress-ring-container">
+                                        <ProgressRing progress={progress} />
+                                    </div>
+                                </div>
+
+                                <div className="map-grid">
+                                    {LOCATIONS.map((location) => (
+                                        <div
+                                            key={location.id}
+                                            className={`location-card ${
+                                                foundLocations.includes(location.id) ? 'found' : 'not-found'
+                                            }`}
+                                            onClick={() => handleLocationClick(location)}
+                                        >
+                                            {foundLocations.includes(location.id) && (
+                                                <div className="checkmark">✓</div>
+                                            )}
+                                            <div className="location-icon">{location.icon}</div>
+                                            <div className="location-name">{location.name}</div>
+                                            <div className="location-points">
+                                                {foundLocations.includes(location.id) ? (
+                                                    <span>+{location.points} pts ✓</span>
+                                                ) : (
+                                                    <span>{location.points} pts</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+
+                        {gameState === 'results' && (
+                            <div className="results-screen">
+                                <div style={{ fontSize: '3em', marginTop: '10px' }}>🎉</div>
+                                <h2 className="results-title">¡Búsqueda Completada!</h2>
+                                <div className="final-points">{totalPoints} Puntos</div>
+
+                                <div className="achievement">
+                                    <div className="achievement-icon">{getAchievement().icon}</div>
+                                    <div>{getAchievement().title}</div>
+                                </div>
+
+                                <div className="qr-coupon">
+                                    <div className="qr-title">Tu Cupón de Recompensa</div>
+                                    <div className="qr-code">
+                                        <div className="qr-box">
+                                            QR COUPON
+                                        </div>
+                                        <div className="qr-text">
+                                            SOR-C-{Math.random().toString(36).substr(2, 8).toUpperCase()}
+                                        </div>
+                                    </div>
+                                    <p style={{ fontSize: '0.85em', color: '#666' }}>
+                                        Presenta este código en caja para reclamar tu descuento
+                                    </p>
+                                </div>
+
+                                <button className="replay-button" onClick={handleReplay}>
+                                    Jugar de Nuevo
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {showScanning && (
+                        <div className="scan-animation">
+                            <div className="scan-box">
+                                <div className="scan-line"></div>
+                                <div className="scan-icons">📍</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {selectedLocation && gameState === 'playing' && (
+                        <div className="modal" onClick={handleCloseModal}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <div style={{ fontSize: '2.5em', marginBottom: '10px' }}>
+                                        {selectedLocation.icon}
+                                    </div>
+                                    <h2>{selectedLocation.name}</h2>
+                                    <div className="points-earned">
+                                        {foundLocations.includes(selectedLocation.id) ? (
+                                            <span>✓ +{selectedLocation.points} puntos</span>
+                                        ) : (
+                                            <span>{selectedLocation.points} puntos</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {foundLocations.includes(selectedLocation.id) ? (
+                                    <div className="fun-fact">
+                                        <div className="fun-fact-title">📚 Dato Curioso</div>
+                                        {selectedLocation.funFact}
+                                    </div>
+                                ) : (
+                                    <div className="fun-fact">
+                                        <div className="fun-fact-title">💡 La Pista</div>
+                                        {selectedLocation.clue}
+                                    </div>
+                                )}
+
+                                <button className="close-button" onClick={handleCloseModal}>
+                                    {foundLocations.includes(selectedLocation.id) ? 'Cerrar' : 'Entendido'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {confettiPieces.length > 0 && <Confetti pieces={confettiPieces} />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<CazadorApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

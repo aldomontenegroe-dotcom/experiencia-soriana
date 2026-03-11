@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta Soriana</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica',
+                'Arial', sans-serif;
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        #root {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .welcome-screen h2 {
+            font-size: 2em;
+            color: #5A9E1E;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .soriana-logo {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(92, 158, 30, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(92, 158, 30, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .ticket-screen {
+            width: 100%;
+            animation: slideIn 0.5s ease;
+        }
+
+        .ticket-screen h2 {
+            font-size: 1.8em;
+            color: #5A9E1E;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #E4F5CC;
+            border-radius: 10px;
+            text-align: center;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #8CC63F;
+            box-shadow: 0 0 0 3px rgba(140, 198, 63, 0.2);
+            background: #F9FFFE;
+        }
+
+        .input-group input::placeholder {
+            color: #CCC;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 15px;
+            font-size: 1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #8CC63F;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5A9E1E;
+        }
+
+        .btn-secondary {
+            background: #E4F5CC;
+            color: #5A9E1E;
+            border: 2px solid #8CC63F;
+        }
+
+        .btn-secondary:hover {
+            background: #CDE5B8;
+        }
+
+        .wheel-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #ED1C24;
+            margin-bottom: -2px;
+            z-index: 10;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        #wheelCanvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #ED1C24 0%, #C41017 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(237, 28, 36, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(237, 28, 36, 0.6);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-screen {
+            text-align: center;
+            animation: slideIn 0.5s ease;
+        }
+
+        .result-screen h2 {
+            font-size: 2.2em;
+            color: #5A9E1E;
+            margin-bottom: 20px;
+        }
+
+        .prize-box {
+            background: linear-gradient(135deg, #F9FFFE 0%, #E4F5CC 100%);
+            border: 3px solid #8CC63F;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prize-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .prize-tier {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tier-platino {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .tier-oro {
+            background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+            color: #333;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .tier-plata {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A9A9A9 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(192, 192, 192, 0.3);
+        }
+
+        .tier-bronce {
+            background: linear-gradient(135deg, #CD7F32 0%, #B8680B 100%);
+            color: white;
+            box-shadow: 0 4px 10px rgba(205, 127, 50, 0.3);
+        }
+
+        .prize-name {
+            font-size: 1.8em;
+            color: #5A9E1E;
+            font-weight: bold;
+            margin: 15px 0;
+            position: relative;
+            z-index: 1;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .prize-description {
+            font-size: 1.1em;
+            color: #666;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .qr-section {
+            background: white;
+            border: 2px solid #DDD;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .qr-code {
+            background: white;
+            border: 3px solid #8CC63F;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            display: inline-block;
+            font-size: 1.4em;
+            font-family: monospace;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #ED1C24;
+        }
+
+        .qr-text {
+            font-size: 0.95em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .welcome-screen h2 {
+                font-size: 1.6em;
+            }
+
+            .prize-name {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 25px 15px;
+            }
+
+            .spin-button {
+                padding: 15px 35px;
+                font-size: 1.1em;
+            }
+        }
+
+        .error-message {
+            color: #ED1C24;
+            margin-top: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        .success-message {
+            color: #5A9E1E;
+            margin-top: 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        // Wheel configuration
+        const PRIZES = [
+            { name: '2x1 Frutas', color: '#8CC63F', tier: 'plata', description: 'Promoción especial en frutas' },
+            { name: 'Bolsa Ecológica', color: '#ED1C24', tier: 'bronce', description: 'Bolsa reutilizable Soriana' },
+            { name: '$200 MXN Desc.', color: '#FFD700', tier: 'oro', description: 'Descuento en tu próxima compra' },
+            { name: 'Recetario Digital', color: '#E4F5CC', tier: 'bronce', description: 'Acceso exclusivo a recetas' },
+            { name: 'Canasta Mexicana', color: '#FF8C00', tier: 'oro', description: 'Productos típicos mexicanos' },
+            { name: '15% Carnes', color: '#C41017', tier: 'plata', description: 'Descuento en sección de carnes' },
+            { name: 'Kit Sorpresa', color: '#9B59B6', tier: 'plata', description: 'Paquete sorpresa exclusivo' },
+            { name: 'Despensa 1 Mes', color: '#FFD700', tier: 'platino', description: 'Canasta básica mensual' },
+        ];
+
+        function WheelCanvas({ rotation, isSpinning }) {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+
+                // Set canvas size
+                const size = Math.min(window.innerWidth - 40, 400);
+                canvas.width = size * dpr;
+                canvas.height = size * dpr;
+                canvas.style.width = size + 'px';
+                canvas.style.height = size + 'px';
+                ctx.scale(dpr, dpr);
+
+                const radius = size / 2;
+                const centerX = radius;
+                const centerY = radius;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, size, size);
+
+                // Draw wheel
+                const sliceAngle = (Math.PI * 2) / PRIZES.length;
+
+                PRIZES.forEach((prize, index) => {
+                    const startAngle = sliceAngle * index + rotation;
+                    const endAngle = startAngle + sliceAngle;
+
+                    // Draw segment
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius - 20, startAngle, endAngle);
+                    ctx.closePath();
+                    ctx.fillStyle = prize.color;
+                    ctx.fill();
+
+                    // Draw border
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    // Draw text
+                    const textAngle = startAngle + sliceAngle / 2;
+                    const textRadius = radius - 80;
+                    const textX = centerX + Math.cos(textAngle) * textRadius;
+                    const textY = centerY + Math.sin(textAngle) * textRadius;
+
+                    ctx.save();
+                    ctx.translate(textX, textY);
+                    ctx.rotate(textAngle + Math.PI / 2);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    const text = prize.name;
+                    const words = text.split(' ');
+                    words.forEach((word, i) => {
+                        ctx.fillText(word, 0, (i - words.length / 2 + 0.5) * 15);
+                    });
+                    ctx.restore();
+                });
+
+                // Draw center hub
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 25, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+                ctx.strokeStyle = '#8CC63F';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Draw center circle with gradient effect
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+                const gradient = ctx.createLinearGradient(centerX - 20, centerY, centerX + 20, centerY);
+                gradient.addColorStop(0, '#8CC63F');
+                gradient.addColorStop(0.5, '#5A9E1E');
+                gradient.addColorStop(1, '#8CC63F');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Draw center dot
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+            }, [rotation]);
+
+            return <canvas ref={canvasRef} id="wheelCanvas" />;
+        }
+
+        function Confetti() {
+            useEffect(() => {
+                const confettiPieces = [];
+                const colors = ['#8CC63F', '#ED1C24', '#FFD700', '#FF8C00', '#9B59B6', '#E4F5CC'];
+
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animation = `confetti-fall ${2 + Math.random() * 1}s ease-in forwards`;
+                    document.body.appendChild(confetti);
+                    confettiPieces.push(confetti);
+                }
+
+                setTimeout(() => {
+                    confettiPieces.forEach(c => c.remove());
+                }, 3500);
+            }, []);
+
+            return null;
+        }
+
+        function RuletaSoriana() {
+            const [screen, setScreen] = useState('welcome'); // welcome, ticket, spin, result
+            const [ticket, setTicket] = useState('');
+            const [ticketError, setTicketError] = useState('');
+            const [rotation, setRotation] = useState(0);
+            const [isSpinning, setIsSpinning] = useState(false);
+            const [selectedPrize, setSelectedPrize] = useState(null);
+
+            const validateTicket = () => {
+                setTicketError('');
+                const cleanTicket = ticket.trim().replace(/\D/g, '');
+
+                if (cleanTicket.length !== 6) {
+                    setTicketError('El número de boleto debe tener 6 dígitos');
+                    return;
+                }
+
+                setScreen('spin');
+            };
+
+            const generateCoupon = () => {
+                const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                return `SOR-R-${randomCode}`;
+            };
+
+            const spin = () => {
+                if (isSpinning) return;
+
+                setIsSpinning(true);
+                const startRotation = rotation;
+                const randomPrizeIndex = Math.floor(Math.random() * PRIZES.length);
+                const prizeRotation = (360 / PRIZES.length) * (PRIZES.length - randomPrizeIndex);
+
+                // Add multiple full spins for effect
+                const totalRotation = startRotation + prizeRotation + 360 * 5 + Math.random() * 30;
+
+                let currentTime = 0;
+                const duration = 5000; // 5 seconds
+                const startTime = Date.now();
+
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // Easing function: ease-out cubic
+                    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                    const newRotation = startRotation + (totalRotation - startRotation) * easeProgress;
+                    setRotation(newRotation * (Math.PI / 180));
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        setIsSpinning(false);
+                        setSelectedPrize(PRIZES[randomPrizeIndex]);
+                        setScreen('result');
+                    }
+                };
+
+                requestAnimationFrame(animate);
+            };
+
+            const playAgain = () => {
+                setScreen('ticket');
+                setTicket('');
+                setTicketError('');
+                setRotation(0);
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>RULETA SORIANA</h1>
+                        <p>¡Gira y gana increíbles premios!</p>
+                    </div>
+
+                    <div className="content">
+                        {screen === 'welcome' && (
+                            <div className="welcome-screen">
+                                <div className="soriana-logo">🎡</div>
+                                <h2>Bienvenido a Ruleta Soriana</h2>
+                                <p>Tienes la oportunidad de ganar</p>
+                                <p>increíbles premios girando nuestra rueda de la fortuna.</p>
+                                <p>¡Valida tu boleto y comienza a jugar!</p>
+                                <button className="btn" onClick={() => setScreen('ticket')}>
+                                    Comenzar
+                                </button>
+                            </div>
+                        )}
+
+                        {screen === 'ticket' && (
+                            <div className="ticket-screen">
+                                <h2>Valida tu Boleto</h2>
+                                <div className="input-group">
+                                    <label htmlFor="ticketInput">Número de Boleto (6 dígitos):</label>
+                                    <input
+                                        id="ticketInput"
+                                        type="text"
+                                        placeholder="000000"
+                                        value={ticket}
+                                        onChange={(e) => {
+                                            const digits = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                            setTicket(digits);
+                                            setTicketError('');
+                                        }}
+                                        maxLength="6"
+                                    />
+                                </div>
+                                {ticketError && <div className="error-message">{ticketError}</div>}
+                                <div className="button-group">
+                                    <button className="btn-secondary" onClick={() => setScreen('welcome')}>
+                                        Cancelar
+                                    </button>
+                                    <button className="btn-primary" onClick={validateTicket}>
+                                        Validar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {screen === 'spin' && (
+                            <div className="wheel-container">
+                                <div className="pointer"></div>
+                                <div className="canvas-wrapper">
+                                    <WheelCanvas rotation={rotation} isSpinning={isSpinning} />
+                                </div>
+                                <button
+                                    className="spin-button"
+                                    onClick={spin}
+                                    disabled={isSpinning}
+                                >
+                                    {isSpinning ? 'GIRANDO...' : 'GIRAR AHORA'}
+                                </button>
+                            </div>
+                        )}
+
+                        {screen === 'result' && selectedPrize && (
+                            <>
+                                <Confetti />
+                                <div className="result-screen">
+                                    <h2>¡GANASTE!</h2>
+                                    <div className="prize-box">
+                                        <div className={`prize-tier tier-${selectedPrize.tier}`}>
+                                            {selectedPrize.tier === 'platino' && '⭐ Platino'}
+                                            {selectedPrize.tier === 'oro' && '🥇 Oro'}
+                                            {selectedPrize.tier === 'plata' && '🥈 Plata'}
+                                            {selectedPrize.tier === 'bronce' && '🥉 Bronce'}
+                                        </div>
+                                        <div className="prize-name">{selectedPrize.name}</div>
+                                        <div className="prize-description">{selectedPrize.description}</div>
+                                    </div>
+
+                                    <div className="qr-section">
+                                        <p><strong>Tu Código de Premio:</strong></p>
+                                        <div className="qr-code">{generateCoupon()}</div>
+                                        <div className="qr-text">
+                                            Presenta este código en cualquier sucursal Soriana<br/>
+                                            para reclamar tu premio.
+                                        </div>
+                                    </div>
+
+                                    <button className="btn" onClick={playAgain}>
+                                        Jugar de Nuevo
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RuletaSoriana />);
+    </script>
+</body>
+</html>

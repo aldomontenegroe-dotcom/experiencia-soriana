@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Qué Tan Mexicano Eres? - Soriana</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #root {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            background:
+                radial-gradient(circle at 20% 50%, #8CC63F 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, #ED1C24 0%, transparent 50%);
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10px, -10px); }
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .soriana-logo {
+            font-size: 14px;
+            font-weight: bold;
+            color: #8CC63F;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .welcome-screen h1 {
+            font-size: 48px;
+            color: #5A9E1E;
+            margin-bottom: 20px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-screen p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(140, 198, 63, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(140, 198, 63, 0.6);
+        }
+
+        .start-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Quiz Screen */
+        .quiz-screen {
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress {
+            font-weight: bold;
+            color: #5A9E1E;
+            font-size: 16px;
+        }
+
+        .timer-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer-label {
+            color: #5A9E1E;
+            font-weight: bold;
+        }
+
+        .timer-bar {
+            width: 100px;
+            height: 8px;
+            background: #E4F5CC;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8CC63F 0%, #5A9E1E 100%);
+            animation: timerAnimation linear;
+            border-radius: 10px;
+        }
+
+        @keyframes timerAnimation {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .question-title {
+            font-size: 24px;
+            color: #5A9E1E;
+            margin-bottom: 30px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background: #F5F5F5;
+            border: 2px solid #E0E0E0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .option-btn:hover {
+            background: #E4F5CC;
+            border-color: #8CC63F;
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            border-color: #5A9E1E;
+            color: white;
+            font-weight: 600;
+            animation: pulse 0.6s ease-out;
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            border-color: #5A9E1E;
+            color: white;
+            font-weight: 600;
+        }
+
+        .option-btn.incorrect {
+            background: linear-gradient(135deg, #FFE8E8 0%, #FFD0D0 100%);
+            border-color: #ED1C24;
+            color: #C41017;
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Results Screen */
+        .results-screen {
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .results-card.gold {
+            border-top: 8px solid #FFD700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(140, 198, 63, 0.05) 100%);
+        }
+
+        .results-card.silver {
+            border-top: 8px solid #C0C0C0;
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.05) 0%, rgba(140, 198, 63, 0.05) 100%);
+        }
+
+        .results-card.bronze {
+            border-top: 8px solid #CD7F32;
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.05) 0%, rgba(140, 198, 63, 0.05) 100%);
+        }
+
+        .medal {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .score-display {
+            font-size: 64px;
+            font-weight: 800;
+            color: #5A9E1E;
+            margin: 20px 0;
+        }
+
+        .result-title {
+            font-size: 32px;
+            color: #5A9E1E;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .result-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .prize-box {
+            background: linear-gradient(135deg, #E4F5CC 0%, #FFE8E8 100%);
+            border: 2px dashed #8CC63F;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .prize-label {
+            color: #5A9E1E;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prize-item {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ED1C24;
+            margin-bottom: 15px;
+        }
+
+        .qr-code {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #8CC63F;
+        }
+
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            color: #5A9E1E;
+            background: #F5F5F5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8CC63F 0%, #5A9E1E 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(140, 198, 63, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(140, 198, 63, 0.6);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #5A9E1E;
+            border: 2px solid #8CC63F;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #E4F5CC;
+            transform: translateY(-2px);
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #8CC63F;
+            animation: confettiFall 3s ease-in forwards;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .welcome-screen {
+                padding: 30px 20px;
+            }
+
+            .welcome-screen h1 {
+                font-size: 36px;
+            }
+
+            .question-card {
+                padding: 25px 20px;
+            }
+
+            .question-title {
+                font-size: 20px;
+            }
+
+            .results-card {
+                padding: 30px 20px;
+            }
+
+            .medal {
+                font-size: 60px;
+            }
+
+            .score-display {
+                font-size: 48px;
+            }
+
+            .result-title {
+                font-size: 24px;
+            }
+
+            .quiz-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Quiz Questions
+        const questions = [
+            {
+                id: 1,
+                question: "¿En qué fecha se celebra la Independencia de México?",
+                options: [
+                    "15 de septiembre",
+                    "16 de septiembre",
+                    "20 de noviembre",
+                    "1 de septiembre"
+                ],
+                correct: 1
+            },
+            {
+                id: 2,
+                question: "¿De qué estado de México es originario el Mole Poblano?",
+                options: [
+                    "Oaxaca",
+                    "Puebla",
+                    "Jalisco",
+                    "Veracruz"
+                ],
+                correct: 1
+            },
+            {
+                id: 3,
+                question: "¿Cuál es una de las pintoras mexicanas más famosas del mundo?",
+                options: [
+                    "Diego Rivera",
+                    "José Clemente Orozco",
+                    "Frida Kahlo",
+                    "Remedios Varo"
+                ],
+                correct: 2
+            },
+            {
+                id: 4,
+                question: "¿Cuál es el propósito principal del Día de Muertos en México?",
+                options: [
+                    "Celebrar el final del año",
+                    "Honrar y recordar a los seres queridos fallecidos",
+                    "Festejar la cosecha de maíz",
+                    "Conmemorar una batalla histórica"
+                ],
+                correct: 1
+            },
+            {
+                id: 5,
+                question: "¿Cuál es el volcán más alto de México?",
+                options: [
+                    "Popocatépetl",
+                    "Iztaccíhuatl",
+                    "Pico de Orizaba",
+                    "Nevado de Toluca"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Prize mapping
+        const getPrizeInfo = (score) => {
+            if (score === 5) {
+                return {
+                    tier: "gold",
+                    title: "¡MEXICANO DE CORAZÓN!",
+                    medal: "🏅",
+                    message: "¡Eres un verdadero mexicano! Conoces y amas la cultura mexicana.",
+                    prize: "Bolsa de Compras Soriana",
+                    icon: "🛍️"
+                };
+            } else if (score >= 3) {
+                return {
+                    tier: "silver",
+                    title: "¡BUEN MEXICANO!",
+                    medal: "🥈",
+                    message: "¡Excelente! Tienes buenos conocimientos sobre la cultura mexicana.",
+                    prize: "Cilindro de Gas",
+                    icon: "🔥"
+                };
+            } else {
+                return {
+                    tier: "bronze",
+                    title: "¡MEXICANO EN ENTRENAMIENTO!",
+                    medal: "🥉",
+                    message: "¡Sigue aprendiendo! Descubre más sobre la rica cultura mexicana.",
+                    prize: "Pluma Soriana",
+                    icon: "✏️"
+                };
+            }
+        };
+
+        // Generate QR Code using QR Server API
+        const generateQRCode = (text) => {
+            return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+        };
+
+        // Generate coupon code
+        const generateCouponCode = () => {
+            const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            return `SOR-Q-${randomCode}`;
+        };
+
+        // Confetti animation
+        const Confetti = () => {
+            const [pieces, setPieces] = useState([]);
+
+            useEffect(() => {
+                const confettiPieces = Array.from({ length: 50 }).map((_, i) => ({
+                    id: i,
+                    left: Math.random() * 100,
+                    delay: Math.random() * 0.3,
+                    duration: 2 + Math.random() * 1
+                }));
+                setPieces(confettiPieces);
+            }, []);
+
+            return (
+                <>
+                    {pieces.map(piece => (
+                        <div
+                            key={piece.id}
+                            className="confetti"
+                            style={{
+                                left: `${piece.left}%`,
+                                backgroundColor: ['#8CC63F', '#ED1C24', '#FFD700'][Math.floor(Math.random() * 3)],
+                                animation: `confettiFall ${piece.duration}s ease-in forwards`,
+                                animationDelay: `${piece.delay}s`
+                            }}
+                        />
+                    ))}
+                </>
+            );
+        };
+
+        // Welcome Screen
+        const WelcomeScreen = ({ onStart }) => (
+            <div className="container">
+                <div className="welcome-screen">
+                    <div className="animated-bg"></div>
+                    <div className="welcome-content">
+                        <div className="soriana-logo">🏪 Soriana</div>
+                        <h1>¿Qué Tan Mexicano Eres?</h1>
+                        <p>Demuestra tu conocimiento sobre la rica cultura mexicana y gana increíbles premios.</p>
+                        <p style={{ fontSize: '16px', color: '#888' }}>Responde 5 preguntas y descubre qué tan mexicano eres.</p>
+                        <button className="start-btn" onClick={onStart}>
+                            Comenzar Quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // Quiz Screen
+        const QuizScreen = ({ question, questionNumber, totalQuestions, onAnswer, timeLeft }) => {
+            const timerPercentage = (timeLeft / 15) * 100;
+
+            return (
+                <div className="container">
+                    <div className="quiz-screen">
+                        <div className="quiz-header">
+                            <div className="progress">
+                                Pregunta {questionNumber} de {totalQuestions}
+                            </div>
+                            <div className="timer-section">
+                                <span className="timer-label">{timeLeft}s</span>
+                                <div className="timer-bar">
+                                    <div
+                                        className="timer-fill"
+                                        style={{ width: `${timerPercentage}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="question-card">
+                            <h2 className="question-title">{question.question}</h2>
+                            <div className="options">
+                                {question.options.map((option, index) => (
+                                    <button
+                                        key={index}
+                                        className="option-btn"
+                                        onClick={() => onAnswer(index)}
+                                    >
+                                        {option}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Results Screen
+        const ResultsScreen = ({ score, onRestart }) => {
+            const prizeInfo = getPrizeInfo(score);
+            const couponCode = generateCouponCode();
+            const qrCodeUrl = generateQRCode(couponCode);
+
+            const handleShare = async () => {
+                const shareText = `¡Obtuve ${score}/5 en el quiz "¿Qué Tan Mexicano Eres?" de Soriana! ${prizeInfo.title}`;
+
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: '¿Qué Tan Mexicano Eres?',
+                            text: shareText,
+                            url: window.location.href
+                        });
+                    } catch (err) {
+                        console.log('Error sharing:', err);
+                    }
+                } else {
+                    // Fallback: copy to clipboard
+                    navigator.clipboard.writeText(shareText);
+                    alert('¡Texto copiado! Ahora puedes compartirlo.');
+                }
+            };
+
+            return (
+                <div className="container">
+                    <Confetti />
+                    <div className="results-screen">
+                        <div className={`results-card ${prizeInfo.tier}`}>
+                            <div className="medal">{prizeInfo.medal}</div>
+                            <div className="score-display">{score}/5</div>
+                            <h2 className="result-title">{prizeInfo.title}</h2>
+                            <p className="result-message">{prizeInfo.message}</p>
+
+                            <div className="prize-box">
+                                <div className="prize-label">Tu Premio</div>
+                                <div className="prize-item">{prizeInfo.icon} {prizeInfo.prize}</div>
+                                <img
+                                    src={qrCodeUrl}
+                                    alt="QR Code"
+                                    className="qr-code"
+                                />
+                                <div className="coupon-code">{couponCode}</div>
+                                <p style={{ fontSize: '12px', color: '#999' }}>Presenta este código en cualquier sucursal Soriana</p>
+                            </div>
+
+                            <div className="action-buttons">
+                                <button className="btn btn-primary" onClick={onRestart}>
+                                    Intentar de Nuevo
+                                </button>
+                                <button className="btn btn-secondary" onClick={handleShare}>
+                                    Compartir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App
+        function QuizApp() {
+            const [screen, setScreen] = useState('welcome'); // welcome, quiz, results
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(15);
+            const [answered, setAnswered] = useState(false);
+
+            // Timer effect
+            useEffect(() => {
+                if (screen !== 'quiz' || answered) return;
+
+                const timer = setTimeout(() => {
+                    if (timeLeft > 0) {
+                        setTimeLeft(timeLeft - 1);
+                    } else {
+                        handleTimeUp();
+                    }
+                }, 1000);
+
+                return () => clearTimeout(timer);
+            }, [timeLeft, screen, answered]);
+
+            const handleStart = () => {
+                setScreen('quiz');
+                setCurrentQuestion(0);
+                setScore(0);
+                setTimeLeft(15);
+                setAnswered(false);
+            };
+
+            const handleAnswer = (selectedIndex) => {
+                if (answered) return;
+
+                setAnswered(true);
+                const question = questions[currentQuestion];
+                if (selectedIndex === question.correct) {
+                    setScore(score + 1);
+                }
+
+                setTimeout(() => {
+                    if (currentQuestion < questions.length - 1) {
+                        setCurrentQuestion(currentQuestion + 1);
+                        setTimeLeft(15);
+                        setAnswered(false);
+                    } else {
+                        setScreen('results');
+                    }
+                }, 1500);
+            };
+
+            const handleTimeUp = () => {
+                if (currentQuestion < questions.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setTimeLeft(15);
+                    setAnswered(false);
+                } else {
+                    setScreen('results');
+                }
+            };
+
+            const handleRestart = () => {
+                handleStart();
+            };
+
+            if (screen === 'welcome') {
+                return <WelcomeScreen onStart={handleStart} />;
+            }
+
+            if (screen === 'quiz') {
+                return (
+                    <QuizScreen
+                        question={questions[currentQuestion]}
+                        questionNumber={currentQuestion + 1}
+                        totalQuestions={questions.length}
+                        onAnswer={handleAnswer}
+                        timeLeft={timeLeft}
+                    />
+                );
+            }
+
+            if (screen === 'results') {
+                return (
+                    <ResultsScreen
+                        score={score}
+                        onRestart={handleRestart}
+                    />
+                );
+            }
+        }
+
+        ReactDOM.render(<QuizApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
